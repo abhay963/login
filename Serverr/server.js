@@ -4,6 +4,7 @@ import 'dotenv/config'; // Load environment variables from .env file
 import cookieParser from "cookie-parser"; // Middleware to parse cookies from HTTP requests
 import connectDB from "./config/mongodb.js"; // Import MongoDB connection function
 import authRouter from './routes/authRoutes.js' // Import authentication routes
+import userRouter from "./routes/userRoutes.js";
 
 const app = express(); // Create an Express application instance
 const port = process.env.PORT || 3000; // Define the port to listen on, default to 3000 if not set
@@ -22,6 +23,7 @@ app.get('/', (req, res) => {
 
 // Mount authentication routes under /api/auth
 app.use('/api/auth', authRouter);
+app.use('/api/auth/user', userRouter);
 
 // Start the server and listen on the specified port
 app.listen(port, () => {
