@@ -1,9 +1,8 @@
-import nodemailer from 'nodemailer';
+// config/nodemailer.js
+import nodemailer from "nodemailer";
 
 const transporter = nodemailer.createTransport({
-  // NOTE: Ensure the SMTP_USER email domain is verified in your MailerSend account to avoid email sending errors.
-  host: 'smtp.mailersend.net',
-  port: 587,
+  service: "gmail",
   auth: {
     user: process.env.SMTP_USER,
     pass: process.env.SMTP_PASS,
@@ -11,5 +10,3 @@ const transporter = nodemailer.createTransport({
 });
 
 export default transporter;
-
-

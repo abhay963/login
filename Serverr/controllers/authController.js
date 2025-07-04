@@ -43,10 +43,9 @@ export const register = async (req, res) => {
 //sending welcom email
 
 const mailOptions={
-    // ISSUE: The from email domain must be verified in your MailerSend account to send emails successfully.
-    // Please ensure the domain of the email address set in process.env.SENDER_EMAIL is verified in MailerSend.
+   
     from:process.env.SENDER_EMAIL,
-    to:email,
+    to:user.email,
     subject:'Welcome to Abhay Tech',
     text:`Welcome to Abhay Tech Website. Your account has been created wtih this email id:${email}`
 }
@@ -122,7 +121,7 @@ export const logout = async (req, res) => {
 
 export const sendVerifyOtp=async(req,res)=>{
     try {
-        const {userId}=req.body;
+        const userId = req.userId;
         const user=await userModel.findById(userId);
 
         if(user.isAccountVerified){
@@ -162,7 +161,8 @@ export const sendVerifyOtp=async(req,res)=>{
 
 
 export const verifyEmail=async(req,res)=>{
-    const {userId,otp}=req.body;
+    const userId = req.userId;
+    const {otp} = req.body;
     if(!userId || !otp){
         return res.json({success:false,message:"Missing Details"});
     }
