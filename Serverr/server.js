@@ -12,7 +12,9 @@ connectDB(); // Connect to MongoDB database
 
 app.use(express.json()); // Middleware to parse JSON bodies from incoming requests
 app.use(cookieParser()); // Middleware to parse cookies
-app.use(cors({ credentials: true })); // Enable CORS with credentials support
+
+const allowedOrigins=['http://localhost:5173']
+app.use(cors({ origin: allowedOrigins,credentials: true })); // Enable CORS with credentials support
 
 // API ENDPOINTS
 
@@ -23,7 +25,7 @@ app.get('/', (req, res) => {
 
 // Mount authentication routes under /api/auth
 app.use('/api/auth', authRouter);
-app.use('/api/auth/user', userRouter);
+app.use('/api/user', userRouter);
 
 // Start the server and listen on the specified port
 app.listen(port, () => {

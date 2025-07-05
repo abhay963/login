@@ -13,6 +13,7 @@ res.json({
     success:true,
     userData:{
         name:user.name,
+        email: user.email,
         isAccountVerified:user.isAccountVerified
     }
 });
