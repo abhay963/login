@@ -1,31 +1,92 @@
-import React from 'react'
-import { assets } from '../assets/assets'
+import React, { useContext, useEffect } from 'react' // Import React hooks
+import { assets } from '../assets/assets' // Import assets like images and icons
+
+import axios from 'axios'; // Import axios for HTTP requests
+import { AppContent } from '../context/AppContext'; // Import app context for auth state
+import { useNavigate } from 'react-router-dom'; // Import navigation hook
 
 const EmailVerify = () => {
+
+  axios.defaults.withCredentials=true; // Ensure cookies are sent
+
+const{backendUrl,isLoggedin,userData,getUserData}=useContext(AppContent) // Get backend URL and auth state from context
+const navigate=useNavigate() // Initialize navigation
+
+const inputRefs=React.useRef([]) // Ref array for OTP inputs
+const handleInput =(e,index)=>{
+if(e.target.value.length>0 && index<inputRefs.current.length-1){
+  inputRefs.current[index+1].focus(); // Auto-focus next input on input
+}
+}
+
+
+const handleKeyDown=(e,index)=>{
+  if(e.key==='Backspace'&&e.target.value==='' &&index>0){
+    inputRefs.current[index-1].focus(); // Auto-focus previous input on backspace
+  }
+}
+
+const handlePaste=(e)=>{
+  const paste=e.clipboardData.getData('text') // Get pasted text
+  const pasteArray=paste.split(''); // Split into characters
+  pasteArray.forEach((char,index)=>{
+    if(inputRefs.current[index]){
+      inputRefs.current[index].value=char; // Fill inputs with pasted chars
+    }
+  })
+}
+
+const onSubmitHandler=async(e)=>{
+  try {
+    e.preventDefault(); // Prevent form submission
+    const otpArray=inputRefs.current.map(e=>e.value) // Get OTP values
+    const otp=otpArray.join('') // Join to string
+    const {data}=await axios.post(backendUrl+'/api/auth/verify-account',{otp}) // Call verify endpoint
+    if(data.success){
+      toast.success(data.message); // Show success toast
+      getUserData(); // Refresh user data
+      navigate('/'); // Navigate home
+    }
+    else{
+      toast.error(data.message) // Show error toast
+    }
+
+  } catch (error) {
+    toast.error(error.message) // Show error toast
+  }
+}
+
+useEffect(()=>{
+isLoggedin&&userData&&userData.isAccountVerified&&navigate('/') // Redirect if already verified
+},[isLoggedin,userData])
   return (
     <div className="flex items-center justify-center min-h-screen  bg-gradient-to-br from-blue-200 to-purple-400">
        <img
-              onClick={() => navigate("/")}
-              src={assets.logo}
+              onClick={() => navigate("/")} // Navigate home on logo click
+              src={assets.logo} // Logo image
               className="absolute left-5 sm:left-20 top-5 w-28 sm:w-32 cursor-pointer"
               alt=""
             />
-      <form  className='bg-slate-900 p-8 rounded-lg shadow-lg w-96 text-sm'>
+      <form onSubmit={onSubmitHandler} className='bg-slate-900 p-8 rounded-lg shadow-lg w-96 text-sm'>
 <h1 className='text-white text-2xl font-semibold text-center mb-4'>Email Verify OTP</h1>
 <p className='text-center mb-6 text-indigo-300'> Enter the 6 digit code sent to your email id.</p>
 
 
-<div className='flex justify-between mb-8'>
+<div className='flex justify-between mb-8' onPaste={handlePaste}>
 
   {Array(6).fill(0).map((_,index)=>(
-<input type='text' maxLength='1' key={index} required  className='w-12 h-1/2 bg-[#333A5C] text-white text-center text-xl rounded-md'/>
+<input type='text' maxLength='1' key={index} required  className='w-12 h-1/2 bg-[#333A5C] text-white text-center text-xl rounded-md'
+ref={e=>inputRefs.current[index]=e}
+onInput={(e)=>handleInput(e,index)}
+onKeyDown={(e)=>handleKeyDown(e,index)}
+/>
 
   ))}
 
 
 
 </div>
-<button className=''>Verify email</button>
+<button className='w-full py-3 bg-gradient-to-r from-indigo-500 to-indigo-900'>Verify email</button>
       </form>
     </div>
   )
